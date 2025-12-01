@@ -1,154 +1,129 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>🎄 Christmas Imposter Game</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Imposter Game</title>
 
-  <style>
+<!-- 🎄 CHRISTMAS STYLING -->
+<style>
     body {
-      font-family: 'Trebuchet MS', sans-serif;
-      text-align: center;
-      background: linear-gradient(#b71c1c, #d84315, #ffcc80);
-      color: white;
-      margin: 0;
-      height: 100vh;
-      overflow: hidden;
+        font-family: "Poppins", sans-serif;
+        background: linear-gradient(#0d1b0f, #114d27);
+        color: white;
+        text-align: center;
+        padding: 40px;
+        background-image: url('https://i.imgur.com/Co5xxQb.png'); /* snowflakes */
+        background-size: cover;
     }
 
-    h1, h2 { text-shadow: 2px 2px 5px rgba(0,0,0,0.4); }
+    h1 {
+        font-size: 40px;
+        margin-bottom: 10px;
+        color: #ffd700;
+        text-shadow: 0 0 15px #ff0000;
+    }
 
-    .screen { display:none; padding: 50px; }
+    select, button {
+        padding: 10px 18px;
+        border-radius: 8px;
+        font-size: 16px;
+        border: none;
+        margin: 8px;
+        cursor: pointer;
+        transition: 0.2s;
+    }
 
     button {
-      background: #2e7d32;
-      color: white;
-      border: none;
-      font-size: 20px;
-      padding: 12px 25px;
-      border-radius: 12px;
-      margin-top: 20px;
-      cursor: pointer;
-      transition: 0.2s;
+        background: #c62828;
+        color: white;
     }
-
     button:hover {
-      background: #43a047;
-      transform: scale(1.05);
+        background: #ff4040;
+        transform: scale(1.05);
     }
 
-    select, input {
-      font-size: 18px;
-      padding: 8px;
-      border-radius: 8px;
-      border: none;
-      margin: 10px;
+    #wordDisplay {
+        font-size: 36px;
+        font-weight: bold;
+        margin-top: 30px;
+        color: #fff;
+        text-shadow: 0 0 10px gold;
     }
 
-    /* ❄ Snow Animation */
-    .snowflake {
-      position: fixed;
-      top: -10px;
-      color: #fff;
-      font-size: 20px;
-      pointer-events: none;
-      animation: fall 8s linear infinite;
+    /* 🔥 STAR REVEAL OVERLAY */
+    #revealScreen {
+        position: fixed;
+        top:0; left:0;
+        width:100%; height:100%;
+        background: repeating-linear-gradient(45deg,#ffd700 2px,#ffef9f 4px,#d41a1a 6px);
+        background-size: 20px 20px;
+        color:black;
+        display:flex;
+        justify-content:center;
+        align-items:center;
+        font-size:32px;
+        font-weight:bold;
+        cursor:pointer;
+        z-index:999;
     }
-
-    @keyframes fall {
-      to { transform: translateY(110vh); opacity: 0; }
+    #revealScreen span{
+        padding:15px 25px;
+        background:white;
+        border-radius:12px;
+        color:#b30000;
+        box-shadow:0 0 20px white;
     }
-  </style>
+</style>
 </head>
 
 <body>
+<h1>🎅 Office Imposter Game</h1>
 
-<!-- SNOWFALL GENERATOR -->
-<script>
-  function createSnow() {
-    const snow = document.createElement("div");
-    snow.classList.add("snowflake");
-    snow.innerText = "❄";
-    snow.style.left = Math.random() * window.innerWidth + "px";
-    snow.style.animationDuration = (5 + Math.random() * 5) + "s";
-    document.body.appendChild(snow);
+<select id="categorySelect">
+    <option value="christmas">🎄 Christmas</option>
+    <option value="finance">💰 Finance</option>
+    <option value="family">👨‍👩‍👧‍👦 Family</option>
+    <option value="sports">⚽ Sports</option>
+</select>
 
-    setTimeout(() => snow.remove(), 10000);
-  }
-  setInterval(createSnow, 200);
-</script>
+<button onclick="startGame()">Start Round</button>
 
-
-<!-- HOME PAGE -->
-<div id="home" class="screen" style="display:block;">
-  <h1>🎄 Christmas Imposter Game 🎁</h1>
-  <p>Pick a category & number of players — then pass the device to reveal roles</p>
-
-  <label>Category:</label>
-  <select id="category">
-    <option value="christmas">Christmas</option>
-    <option value="finance">Finance</option>
-    <option value="family">Family</option>
-    <option value="sports">Sports</option>
-    <option value="office">Office</option>
-  </select><br>
-
-  <label>Players:</label>
-  <input type="number" id="players" min="3" max="20" value="5"><br>
-
-  <button onclick="startGame()">Start Game 🎅</button>
+<!-- 📌 Hidden reveal layer -->
+<div id="revealScreen" onclick="revealWord()">
+    <span>⭐ Tap to reveal keyword & imposter ⭐</span>
 </div>
 
-
-<!-- ROLE REVEAL -->
-<div id="reveal" class="screen">
-  <h2 id="playerInfo"></h2>
-  <h1 id="wordDisplay" style="font-size:40px; margin-top:25px;"></h1>
-  <button onclick="nextPlayer()">Next ➡</button>
-</div>
-
-
-<!-- GAME END SCREEN -->
-<div id="end" class="screen">
-  <h1>🎉 All roles revealed!</h1>
-  <p>Discuss & find the Imposter — good luck 😈</p>
-  <button onclick="location.reload()">Play Again 🔄</button>
-</div>
-
+<div id="wordDisplay"></div>
 
 <script>
 const words = {
-  christmas: ["Santa","Reindeer","Elf","Snowman","Mistletoe","Sleigh","Stocking","Ornaments","Carols","Gingerbread","Gift","Wish","Tree","Lights"],
-  finance: ["Budget","Profit","Loss","Credit","Equity","Revenue","Dividend","Tax","Interest","Market","Assets","Capital","Shares","Inflation"],
-  family: ["Parents","Sibling","Grandma","Dinner","Cousin","Holiday","Baby","Tradition","Wedding","Birthday","Vacation","Uncle","Aunt","Home"],
-  sports: ["Football","Tennis","Coach","Referee","Goalkeeper","Athlete","Stadium","Penalty","Marathon","Cycling","Badminton","Racing","Swimming","Basketball"],
-  office: ["Meeting","Deadline","Coffee","Laptop","Printer","Budgeting","KPI","Presentation","Spreadsheet","Breaktime","Lunch","Overtime","Boss","Promotion"]
+    christmas: ["tree","gift","snow","santa","reindeer","stocking","cookie","holiday","fireplace","bells"],
+    finance: ["salary","budget","invoice","tax","bonus","credit","expense","profit","audit","balance"],
+    family: ["mother","father","siblings","dinner","holiday","grandma","home","weekend","cousin","tradition"],
+    sports: ["football","basketball","running","tennis","swimming","cycling","yoga","gym","training","trophy"]
 };
 
-let chosenWord = "", totalPlayers = 0, imposterIndex = 0, currentPlayer = 1;
+let chosenWord = "";
+let imposter = "";
 
 function startGame() {
-  totalPlayers = Number(document.getElementById("players").value);
-  const category = document.getElementById("category").value;
+    let category = document.getElementById("categorySelect").value;
+    let list = words[category];
 
-  chosenWord = words[category][Math.floor(Math.random()*words[category].length)];
-  imposterIndex = Math.floor(Math.random()*totalPlayers) + 1;
+    chosenWord = list[Math.floor(Math.random()*list.length)];
+    imposter = Math.random() < 0.25 ? "You are IMPOSTER!" : chosenWord;
 
-  document.getElementById("home").style.display="none";
-  showReveal();
+    // Hide behind stars
+    document.getElementById("revealScreen").style.display="flex";
+    document.getElementById("wordDisplay").innerHTML=""
 }
 
-function showReveal(){
-  document.getElementById("reveal").style.display="block";
-  document.getElementById("playerInfo").innerText = `Player ${currentPlayer}, your word is...`;
-  document.getElementById("wordDisplay").innerText = 
-    currentPlayer === imposterIndex ? "❓ You are the IMPOSTER!" : chosenWord;
-}
-
-function nextPlayer(){
-  currentPlayer++;
-  if(currentPlayer > totalPlayers){
-    document.getElementById("reveal").style.display="none";
-    document.getElementById("end").style.display="block";
-  } else showReveal();
+function revealWord(){
+    document.getElementById("revealScreen").style.display="none";
+    document.getElementById("wordDisplay").innerHTML = 
+    "Keyword: <span style='color:#90ee90'>"+chosenWord+
+    "</span><br><br><b>One random player is IMPOSTER 🔥</b>";
 }
 </script>
 
