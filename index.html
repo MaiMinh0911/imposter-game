@@ -30,7 +30,7 @@
 
     @keyframes fall {
       0% { transform: translateY(-10vh) translateX(0); opacity: 1; }
-      100% { transform: translateY(110vh) translateX(20px); opacity: 0; }
+      100% { transform: translateY(110vh) translateX(var(--deltaX)); opacity: 0; }
     }
 
     .container {
@@ -42,29 +42,27 @@
       max-width: 420px;
     }
 
-    select, button, input {
-      padding: 12px;
-      margin-top: 12px;
-      font-size: 16px;
+    .form-row {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      margin-bottom: 15px;
       width: 100%;
-      border-radius: 10px;
-      border: none;
     }
 
     label {
-      display: block;
-      margin-top: 20px;
       margin-bottom: 5px;
+      font-weight: bold;
       font-size: 16px;
     }
 
-    select {
+    input, select, button {
       padding: 12px;
-      margin-top: 12px;
       font-size: 16px;
       width: 100%;
       border-radius: 10px;
       border: none;
+      box-sizing: border-box;
     }
 
     select {
@@ -77,6 +75,7 @@
       background: #ff3b3b;
       color: #fff;
       font-weight: bold;
+      margin-top: 12px;
     }
 
     #hiddenScreen {
@@ -95,17 +94,29 @@
       padding: 20px;
     }
 
-    #revealButton {
+    #revealButton, #nextPlayerBtn, #restartBtn {
       margin-top: 20px;
       padding: 12px;
-      background: #4caf50;
       border-radius: 10px;
       cursor: pointer;
       border: none;
-      color: white;
       font-size: 18px;
     }
 
+    #revealButton {
+      background: #4caf50;
+      color: white;
+    }
+
+    #nextPlayerBtn {
+      background: #2196f3;
+      color: white;
+    }
+
+    #restartBtn {
+      background: #ff9800;
+      color: white;
+    }
   </style>
 </head>
 <body>
@@ -115,16 +126,20 @@
   <div class="container" id="setupScreen">
     <h2>🎄 Imposter Game 🎄</h2>
 
-    <label>Number of players:</label>
-    <input type="number" id="playerCount" min="3" max="20" />
+    <div class="form-row">
+      <label for="playerCount">Number of players:</label>
+      <input type="number" id="playerCount" min="3" max="20" />
+    </div>
 
-    <label>Category:</label>
-    <select id="categorySelect">
-      <option value="christmas">Christmas</option>
-      <option value="office">Office</option>
-      <option value="sports">Sports</option>
-      <option value="family">Family</option>
-    </select>
+    <div class="form-row">
+      <label for="categorySelect">Category:</label>
+      <select id="categorySelect">
+        <option value="christmas">Christmas</option>
+        <option value="office">Office</option>
+        <option value="sports">Sports</option>
+        <option value="family">Family</option>
+      </select>
+    </div>
 
     <button onclick="startGame()">Start Game</button>
   </div>
@@ -133,11 +148,11 @@
     <div id="starCover">⭐⭐⭐ Tap to Reveal ⭐⭐⭐</div>
     <button id="revealButton" onclick="revealRole()">Reveal</button>
     <div id="roleDisplay" style="display:none; margin-top:20px;"></div>
-    <button id="nextPlayerBtn" style="display:none; margin-top:20px;" onclick="nextPlayer()">Next Player</button>
+    <button id="nextPlayerBtn" style="display:none;" onclick="nextPlayer()">Next Player</button>
+    <button id="restartBtn" style="display:none;" onclick="restartGame()">Restart Game</button>
   </div>
 
 <script>
-// Word lists (single-word, office-friendly)
 const words = {
   christmas: ["snow", "santa", "reindeer", "cookie", "gift", "tree", "bells", "lights", "stocking", "winter"],
   office: ["email", "deadline", "coffee", "meeting", "printer", "budget", "spreadsheet", "presentation", "manager", "laptop"],
@@ -153,7 +168,10 @@ let currentPlayer = 1;
 function startGame() {
   const category = document.getElementById('categorySelect').value;
   totalPlayers = parseInt(document.getElementById('playerCount').value);
-  if (!totalPlayers || totalPlayers < 3) return alert("At least 3 players needed!");
+
+  if (!totalPlayers || totalPlayers < 3 || totalPlayers > 20) {
+    return alert("Players must be between 3 and 20!");
+  }
 
   const list = words[category];
   selectedWord = list[Math.floor(Math.random() * list.length)];
@@ -167,31 +185,42 @@ function startGame() {
 function resetHidden() {
   document.getElementById('roleDisplay').style.display = 'none';
   document.getElementById('nextPlayerBtn').style.display = 'none';
+  document.getElementById('restartBtn').style.display = 'none';
   document.getElementById('starCover').style.display = 'block';
   document.getElementById('revealButton').style.display = 'block';
 }
 
 function revealRole() {
-  document.getElementById('roleDisplay').style.display = 'block';
+  const roleDisplay = document.getElementById('roleDisplay');
+  roleDisplay.style.display = 'block';
   document.getElementById('starCover').style.display = 'none';
   document.getElementById('revealButton').style.display = 'none';
 
+  const category = document.getElementById('categorySelect').value;
+  const list = words[category];
+
   if (currentPlayer === imposterIndex) {
-    document.getElementById('roleDisplay').innerHTML = "❗ You are the IMPOSTER!<br><br>Hint keyword: Think general!";
+    const hintWords = list.filter(word => word !== selectedWord);
+    const hint = hintWords[Math.floor(Math.random() * hintWords.length)];
+    roleDisplay.innerHTML = `❗ You are the IMPOSTER!<br><br>Hint: Related to "${hint}"`;
   } else {
-    document.getElementById('roleDisplay').innerHTML = "Your word is:<br><strong style='font-size:32px;'>" + selectedWord + "</strong>";
+    roleDisplay.innerHTML = `Your word is:<br><strong style='font-size:32px;'>${selectedWord}</strong>`;
   }
 
   if (currentPlayer < totalPlayers) {
     document.getElementById('nextPlayerBtn').style.display = 'block';
   } else {
-    document.getElementById('nextPlayerBtn').style.display = 'none';
+    document.getElementById('restartBtn').style.display = 'block';
   }
 }
 
 function nextPlayer() {
   currentPlayer++;
   resetHidden();
+}
+
+function restartGame() {
+  location.reload();
 }
 
 // Snowflake generator
@@ -201,11 +230,16 @@ function createSnowflake() {
   snow.textContent = '❄';
   snow.style.left = Math.random() * 100 + 'vw';
   snow.style.fontSize = (Math.random() * 10 + 10) + 'px';
-  snow.style.animationDuration = (Math.random() * 5 + 5) + 's';
-  document.body.appendChild(snow);
+  const duration = (Math.random() * 5 + 5) + 's';
+  snow.style.animationDuration = duration;
 
-  setTimeout(() => snow.remove(), 10000);
+  const deltaX = (Math.random() * 40 - 20) + 'px'; // horizontal drift
+  snow.style.setProperty('--deltaX', deltaX);
+
+  document.body.appendChild(snow);
+  setTimeout(() => snow.remove(), parseFloat(duration) * 1000);
 }
+
 setInterval(createSnowflake, 200);
 </script>
 </body>
