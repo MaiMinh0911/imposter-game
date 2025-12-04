@@ -5,204 +5,208 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Imposter Game</title>
   <style>
-    /* --- Page styling --- */
-    :root{ --bg1:#07142a; --bg2:#123a66; --panel: rgba(255,255,255,0.04); --accent:#ffea70; --btn:#ff5b5b }
-    html,body{height:100%; margin:0; font-family:Inter, system-ui, Arial, sans-serif; background: linear-gradient(180deg,var(--bg1),var(--bg2)); color:#fff}
-    .wrap{min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; box-sizing:border-box; overflow:hidden}
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      color: #fff;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(180deg, #0a1a3f, #1a3c6e);
+      overflow: hidden;
+    }
 
-    .container{width:100%; max-width:460px; background:var(--panel); border-radius:14px; padding:26px; box-shadow:0 10px 30px rgba(0,0,0,0.4);}
-    h2{margin:2px 0 6px 0; color:var(--accent); text-align:center}
-    label{display:block; margin-top:16px; margin-bottom:6px; color:rgba(255,255,255,0.9)}
+    /* Snowflakes */
+    .snowflake {
+      position: fixed;
+      top: -10px;
+      color: #ffffffaa;
+      font-size: 1em;
+      user-select: none;
+      animation: fall linear infinite;
+    }
 
-    input[type=number], select, button{width:100%; padding:12px; border-radius:10px; border:none; box-sizing:border-box; font-size:15px}
-    input[type=number], select{background:#f4f6f9; color:#111}
-    .controls{display:flex; gap:10px; margin-top:14px}
-    .controls button{flex:1}
+    @keyframes fall {
+      0% { transform: translateY(-10vh) translateX(0); opacity: 1; }
+      100% { transform: translateY(110vh) translateX(20px); opacity: 0; }
+    }
 
-    button.primary{background:var(--accent); color:#111; font-weight:700}
-    button.ghost{background:transparent; border:1px solid rgba(255,255,255,0.06); color:#fff}
+    .container {
+      text-align: center;
+      background: rgba(0,0,0,0.4);
+      padding: 30px;
+      border-radius: 15px;
+      width: 90%;
+      max-width: 420px;
+    }
 
-    /* Hidden full-screen reveal overlay */
-    #hiddenScreen{display:none; position:fixed; inset:0; display:flex; align-items:center; justify-content:center; z-index:60}
-    #hiddenInner{width:100%; max-width:420px; background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.06)); padding:28px; border-radius:12px; text-align:center}
-    #starCover{background:linear-gradient(90deg,#fff8cc,#fff1c6); color:#b30000; padding:12px 18px; border-radius:999px; display:inline-block; font-weight:800}
-    #revealButton{margin-top:18px; background:#4caf50; color:white; padding:12px; border-radius:10px; font-weight:700}
-    #roleDisplay{display:none; margin-top:18px; font-size:20px}
-    #roleDisplay strong.word{display:block; margin-top:12px; font-size:34px; color:#d8ffd8}
-    #nextPlayerBtn{margin-top:18px; display:none; padding:10px 14px; border-radius:10px;}
+    select, button, input {
+      padding: 12px;
+      margin-top: 12px;
+      font-size: 16px;
+      width: 100%;
+      border-radius: 10px;
+      border: none;
+    }
 
-    /* Snowflake styling */
-    .snowflake{position:fixed; top:-10vh; color:rgba(255,255,255,0.9); user-select:none; pointer-events:none; animation:fall linear infinite}
-    @keyframes fall{0%{transform:translateY(-10vh) translateX(0); opacity:1}100%{transform:translateY(110vh) translateX(40px); opacity:0}}
+    label {
+      display: block;
+      margin-top: 20px;
+      margin-bottom: 5px;
+      font-size: 16px;
+    }
 
-    /* Responsive tweaks */
-    @media (max-width:420px){ #roleDisplay strong.word{font-size:28px} #hiddenInner{padding:20px} }
+    select {
+      padding: 12px;
+      margin-top: 12px;
+      font-size: 16px;
+      width: 100%;
+      border-radius: 10px;
+      border: none;
+    }
+
+    select {
+      color: #000;
+      background: #f2f2f2;
+    }
+
+    button {
+      cursor: pointer;
+      background: #ff3b3b;
+      color: #fff;
+      font-weight: bold;
+    }
+
+    #hiddenScreen {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #0a1a3f;
+      color: white;
+      font-size: 30px;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      padding: 20px;
+    }
+
+    #revealButton {
+      margin-top: 20px;
+      padding: 12px;
+      background: #4caf50;
+      border-radius: 10px;
+      cursor: pointer;
+      border: none;
+      color: white;
+      font-size: 18px;
+    }
+
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="container" id="setupScreen">
-      <h2>🎄 Imposter Game — Office Edition</h2>
-      <p style="opacity:0.9; text-align:center; margin-top:6px">Choose players & category — pass the device. Each player taps to reveal their role privately.</p>
 
-      <label for="playerCount">Number of players</label>
-      <input id="playerCount" type="number" min="3" max="20" value="6" />
+  <div id="snowContainer"></div>
 
-      <label for="categorySelect">Category</label>
-      <select id="categorySelect">
-        <option value="christmas">Christmas</option>
-        <option value="office">Office</option>
-        <option value="sports">Sports</option>
-        <option value="family">Family</option>
-      </select>
+  <div class="container" id="setupScreen">
+    <h2>🎄 Imposter Game 🎄</h2>
 
-      <div class="controls">
-        <button class="primary" id="startBtn">Start Game</button>
-        <button class="ghost" id="demoBtn">Quick Demo</button>
-      </div>
-    </div>
+    <label>Number of players:</label>
+    <input type="number" id="playerCount" min="3" max="20" />
+
+    <label>Category:</label>
+    <select id="categorySelect">
+      <option value="christmas">Christmas</option>
+      <option value="office">Office</option>
+      <option value="sports">Sports</option>
+      <option value="family">Family</option>
+    </select>
+
+    <button onclick="startGame()">Start Game</button>
   </div>
 
-  <!-- Full-screen reveal modal (hidden until game starts) -->
-  <div id="hiddenScreen" aria-hidden="true">
-    <div id="hiddenInner">
-      <div id="starCover">⭐️ Tap to reveal ⭐️</div>
-      <button id="revealButton">Reveal</button>
-
-      <div id="roleDisplay"><div id="roleText"></div><strong class="word" id="wordText"></strong></div>
-      <button id="nextPlayerBtn" class="ghost">Next Player</button>
-    </div>
+  <div id="hiddenScreen">
+    <div id="starCover">⭐⭐⭐ Tap to Reveal ⭐⭐⭐</div>
+    <button id="revealButton" onclick="revealRole()">Reveal</button>
+    <div id="roleDisplay" style="display:none; margin-top:20px;"></div>
+    <button id="nextPlayerBtn" style="display:none; margin-top:20px;" onclick="nextPlayer()">Next Player</button>
   </div>
 
 <script>
-// --- Word lists ---
+// Word lists (single-word, office-friendly)
 const words = {
-  christmas: ["snow","santa","reindeer","cookie","gift","tree","bells","lights","stocking","winter"],
-  office: ["email","deadline","coffee","meeting","printer","budget","spreadsheet","presentation","manager","laptop"],
-  sports: ["soccer","tennis","running","boxing","cycling","golf","swimming","baseball","basketball","volleyball"],
-  family: ["mother","father","sister","brother","dinner","holiday","laugh","cousin","grandma","tradition"]
+  christmas: ["snow", "santa", "reindeer", "cookie", "gift", "tree", "bells", "lights", "stocking", "winter"],
+  office: ["email", "deadline", "coffee", "meeting", "printer", "budget", "spreadsheet", "presentation", "manager", "laptop"],
+  sports: ["soccer", "tennis", "running", "boxing", "cycling", "golf", "swimming", "baseball", "basketball", "volleyball"],
+  family: ["mother", "father", "sister", "brother", "dinner", "holiday", "laugh", "cousin", "grandma", "tradition"]
 };
 
-// Hint keywords (keyword-style hints for impostor)
-const hintKeywords = {
-  christmas: ["snow","gift","tree","lights"],
-  office: ["work","task","email","coffee"],
-  sports: ["team","run","ball","score"],
-  family: ["home","love","dinner","laugh"]
-};
-
-// --- State ---
 let selectedWord = "";
 let imposterIndex = -1;
 let totalPlayers = 0;
 let currentPlayer = 1;
-let category = 'christmas';
 
-// DOM refs
-const startBtn = document.getElementById('startBtn');
-const demoBtn = document.getElementById('demoBtn');
-const hiddenScreen = document.getElementById('hiddenScreen');
-const revealButton = document.getElementById('revealButton');
-const starCover = document.getElementById('starCover');
-const roleDisplay = document.getElementById('roleDisplay');
-const roleText = document.getElementById('roleText');
-const wordText = document.getElementById('wordText');
-const nextPlayerBtn = document.getElementById('nextPlayerBtn');
+function startGame() {
+  const category = document.getElementById('categorySelect').value;
+  totalPlayers = parseInt(document.getElementById('playerCount').value);
+  if (!totalPlayers || totalPlayers < 3) return alert("At least 3 players needed!");
 
-// Attach handlers after DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-  startBtn.addEventListener('click', () => startGame(false));
-  demoBtn.addEventListener('click', () => { document.getElementById('playerCount').value = 4; startGame(true); });
-  revealButton.addEventListener('click', revealRole);
-  nextPlayerBtn.addEventListener('click', nextPlayer);
-
-  // Start snow generator
-  setInterval(createSnowflake, 220);
-});
-
-// --- Game functions ---
-function startGame(isDemo = false){
-  const sel = document.getElementById('categorySelect');
-  category = sel.value || 'christmas';
-  totalPlayers = Math.max(3, Math.min(20, parseInt(document.getElementById('playerCount').value) || 6));
-
-  // pick a word and an imposter
-  const list = words[category] || words.christmas;
+  const list = words[category];
   selectedWord = list[Math.floor(Math.random() * list.length)];
-  imposterIndex = Math.floor(Math.random() * totalPlayers) + 1; // 1-based index
+  imposterIndex = Math.floor(Math.random() * totalPlayers) + 1;
 
-  currentPlayer = 1;
-
-  // show overlay modal
-  hiddenScreen.style.display = 'flex';
-  hiddenScreen.setAttribute('aria-hidden','false');
+  document.getElementById('setupScreen').style.display = 'none';
+  document.getElementById('hiddenScreen').style.display = 'flex';
   resetHidden();
 }
 
-function resetHidden(){
-  // prepare for current player
-  starCover.style.display = 'inline-block';
-  revealButton.style.display = 'inline-block';
-  roleDisplay.style.display = 'none';
-  nextPlayerBtn.style.display = 'none';
-  roleText.innerHTML = '';
-  wordText.innerText = '';
-  // show hint to instruct player (not revealing content)
-  starCover.innerText = `Player ${currentPlayer} — Tap to reveal`;
+function resetHidden() {
+  document.getElementById('roleDisplay').style.display = 'none';
+  document.getElementById('nextPlayerBtn').style.display = 'none';
+  document.getElementById('starCover').style.display = 'block';
+  document.getElementById('revealButton').style.display = 'block';
 }
 
-function revealRole(){
-  // hide star cover and reveal content
-  starCover.style.display = 'none';
-  revealButton.style.display = 'none';
-  roleDisplay.style.display = 'block';
+function revealRole() {
+  document.getElementById('roleDisplay').style.display = 'block';
+  document.getElementById('starCover').style.display = 'none';
+  document.getElementById('revealButton').style.display = 'none';
 
-  if (currentPlayer === imposterIndex){
-    const pool = hintKeywords[category] || ['hint'];
-    const randomHint = pool[Math.floor(Math.random() * pool.length)];
-    roleText.innerHTML = '❗ You are the IMPOSTER!';
-    wordText.innerText = randomHint; // show hint as small keyword
+  if (currentPlayer === imposterIndex) {
+    document.getElementById('roleDisplay').innerHTML = "❗ You are the IMPOSTER!<br><br>Hint keyword: Think general!";
   } else {
-    roleText.innerHTML = 'Your word is:';
-    wordText.innerText = selectedWord.toUpperCase();
+    document.getElementById('roleDisplay').innerHTML = "Your word is:<br><strong style='font-size:32px;'>" + selectedWord + "</strong>";
   }
 
-  // if not last player, show Next button
-  if (currentPlayer < totalPlayers){
-    nextPlayerBtn.style.display = 'inline-block';
-    nextPlayerBtn.innerText = 'Hide & Pass';
+  if (currentPlayer < totalPlayers) {
+    document.getElementById('nextPlayerBtn').style.display = 'block';
   } else {
-    nextPlayerBtn.style.display = 'inline-block';
-    nextPlayerBtn.innerText = 'All Revealed — Close';
+    document.getElementById('nextPlayerBtn').style.display = 'none';
   }
 }
 
-function nextPlayer(){
-  // if last player, close overlay and let group play
-  if (currentPlayer >= totalPlayers){
-    hiddenScreen.style.display = 'none';
-    hiddenScreen.setAttribute('aria-hidden','true');
-    // reset for next possible round
-    return;
-  }
-
-  // move to next player
-  currentPlayer += 1;
+function nextPlayer() {
+  currentPlayer++;
   resetHidden();
 }
 
-// --- Snowflake generator ---
-function createSnowflake(){
-  const s = document.createElement('div');
-  s.className = 'snowflake';
-  s.textContent = '❄';
-  const size = (Math.random() * 18) + 10; s.style.fontSize = size + 'px';
-  s.style.left = (Math.random() * 100) + 'vw';
-  s.style.opacity = (Math.random() * 0.6) + 0.4;
-  s.style.animationDuration = (Math.random() * 6 + 6) + 's';
-  document.body.appendChild(s);
-  setTimeout(() => s.remove(), 14000);
+// Snowflake generator
+function createSnowflake() {
+  const snow = document.createElement('div');
+  snow.className = 'snowflake';
+  snow.textContent = '❄';
+  snow.style.left = Math.random() * 100 + 'vw';
+  snow.style.fontSize = (Math.random() * 10 + 10) + 'px';
+  snow.style.animationDuration = (Math.random() * 5 + 5) + 's';
+  document.body.appendChild(snow);
+
+  setTimeout(() => snow.remove(), 10000);
 }
+setInterval(createSnowflake, 200);
 </script>
 </body>
 </html>
