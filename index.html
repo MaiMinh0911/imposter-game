@@ -54,6 +54,7 @@
       margin-bottom: 5px;
       font-weight: bold;
       font-size: 16px;
+      text-align: left;
     }
 
     input, select, button {
@@ -72,8 +73,6 @@
 
     button {
       cursor: pointer;
-      background: #ff3b3b;
-      color: #fff;
       font-weight: bold;
       margin-top: 12px;
     }
@@ -103,20 +102,9 @@
       font-size: 18px;
     }
 
-    #revealButton {
-      background: #4caf50;
-      color: white;
-    }
-
-    #nextPlayerBtn {
-      background: #2196f3;
-      color: white;
-    }
-
-    #restartBtn {
-      background: #ff9800;
-      color: white;
-    }
+    #revealButton { background: #4caf50; color: white; }
+    #nextPlayerBtn { background: #2196f3; color: white; }
+    #restartBtn { background: #ff9800; color: white; }
   </style>
 </head>
 <body>
@@ -154,10 +142,10 @@
 
 <script>
 const words = {
-  christmas: ["snow", "santa", "reindeer", "cookie", "gift", "tree", "bells", "lights", "stocking", "winter"],
-  office: ["email", "deadline", "coffee", "meeting", "printer", "budget", "spreadsheet", "presentation", "manager", "laptop"],
-  sports: ["soccer", "tennis", "running", "boxing", "cycling", "golf", "swimming", "baseball", "basketball", "volleyball"],
-  family: ["mother", "father", "sister", "brother", "dinner", "holiday", "laugh", "cousin", "grandma", "tradition"]
+  christmas: ["mistletoe", "carol", "gingerbread", "candle", "chimney", "sleigh", "cocoa", "wreath", "elf", "snow globe"],
+  office: ["synergy", "brainstorming", "KPI", "workflow", "spreadsheet", "pivot", "deadline", "merger", "inbox", "elevator pitch"],
+  sports: ["goal", "penalty", "marathon", "serve", "coach", "referee", "league", "trophy", "stadium", "training"],
+  family: ["reunion", "holiday", "sibling", "birthday", "dinner", "cousin", "tradition", "grandparents", "vacation", "storytelling"]
 };
 
 let selectedWord = "";
@@ -233,7 +221,7 @@ function createSnowflake() {
   const duration = (Math.random() * 5 + 5) + 's';
   snow.style.animationDuration = duration;
 
-  const deltaX = (Math.random() * 40 - 20) + 'px'; // horizontal drift
+  const deltaX = (Math.random() * 40 - 20) + 'px';
   snow.style.setProperty('--deltaX', deltaX);
 
   document.body.appendChild(snow);
