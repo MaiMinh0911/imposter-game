@@ -77,6 +77,12 @@
       margin-top: 12px;
     }
 
+    /* Red Start Game button */
+    #setupScreen button {
+      background: #ff3b3b;
+      color: #fff;
+    }
+
     #hiddenScreen {
       display: none;
       position: fixed;
@@ -142,10 +148,22 @@
 
 <script>
 const words = {
-  christmas: ["mistletoe", "carol", "gingerbread", "candle", "chimney", "sleigh", "cocoa", "wreath", "elf", "snow globe"],
-  office: ["synergy", "brainstorming", "KPI", "workflow", "spreadsheet", "pivot", "deadline", "merger", "inbox", "elevator pitch"],
-  sports: ["goal", "penalty", "marathon", "serve", "coach", "referee", "league", "trophy", "stadium", "training"],
-  family: ["reunion", "holiday", "sibling", "birthday", "dinner", "cousin", "tradition", "grandparents", "vacation", "storytelling"]
+  christmas: [
+    "mistletoe", "carol", "gingerbread", "candle", "chimney", "sleigh", "cocoa", "wreath", "elf", "snow globe",
+    "reindeer", "stocking", "snowman", "bells", "presents", "holly", "tree", "icicle", "north pole", "angel"
+  ],
+  office: [
+    "synergy", "brainstorming", "KPI", "workflow", "spreadsheet", "pivot", "deadline", "merger", "inbox", "elevator pitch",
+    "budget", "teamwork", "presentation", "client", "manager", "agenda", "report", "strategy", "meeting", "innovation"
+  ],
+  sports: [
+    "goal", "penalty", "marathon", "serve", "coach", "referee", "league", "trophy", "stadium", "training",
+    "match", "score", "team", "practice", "competition", "championship", "athlete", "victory", "field", "game"
+  ],
+  family: [
+    "reunion", "holiday", "sibling", "birthday", "dinner", "cousin", "tradition", "grandparents", "vacation", "storytelling",
+    "celebration", "childhood", "heirloom", "ceremony", "memory", "bonding", "inheritance", "gathering", "love", "ancestry"
+  ]
 };
 
 let selectedWord = "";
